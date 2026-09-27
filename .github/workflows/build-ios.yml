@@ -18,12 +18,17 @@ jobs:
       - name: Patch old libpng for modern Xcode
         run: |
           sed -i '' '/# *include <fp.h>/d' godot/thirdparty/libpng/pngpriv.h
-          printf '#include <math.h>\n' | cat - godot/thirdparty/libpng/pngrtran.c > /tmp/pngrtran.c && mv /tmp/pngrtran.c godot/thirdparty/libpng/pngrtran.c
-
+          sed -i '' '1i\
+          #include <math.h>
+          ' godot/thirdparty/libpng/png.c
+          sed -i '' '1i\
+          #include <math.h>
+          ' godot/thirdparty/libpng/pngrtran.c
       - name: Install SCons
         run: |
           brew install python@3.11
           python3.11 -m pip install scons==4.5.2 setuptools
+        
 
       - name: Build Godot for iOS
         run: |
