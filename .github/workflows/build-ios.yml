@@ -15,16 +15,34 @@ jobs:
         run: |
           sw_vers
           xcodebuild -version
-          uname -m
+          python3 --version
 
       - name: Check uploaded files
         run: |
-          ls -lah
-          test -f project.binary
-          echo "project.binary found"
+          ls -lh project.binary
+          file project.binary
 
-      - name: Create iOS project
+      - name: Download Godot 3.5.3 source
         run: |
-          mkdir -p build/SFTA
-          cp project.binary build/SFTA/project.binary
-          echo "SFTA files prepared"
+          curl -L -o godot.zip https://github.com/godotengine/godot/archive/refs/tags/3.5.3-stable.zip
+          unzip -q godot.zip
+          mv godot-3.5.3-stable godot
+
+      - name: Install build tools
+        run: |
+          brew install scons
+
+      - name: Build Godot for iOS
+        working-directory: godot
+        run: |
+          scons platform=iphone target=release tools=no -j2
+
+      - name: Prepare SFTA project
+        run: |
+          mkdir -p sfta
+          cp project.binary sfta/project.binary
+
+      - name: Show result
+        run: |
+          find godot/bin -maxdepth 1 -type f -print
+          ls -lh sfta
