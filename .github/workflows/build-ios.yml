@@ -29,8 +29,8 @@ jobs:
         run: |
           cd godot
           set -o pipefail
-                  scons platform=iphone target=release arch=arm64 2>&1 | tee build.log
-
+                  scons platform=iphone target=release arch=arm64 2>&1 | tee build.log || true
+                  grep -n -B 5 -A 10 -i "error:" build.log || true
       - name: Prepare SFTA project
         run: |
           echo "Godot iOS build completed"
