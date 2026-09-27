@@ -31,7 +31,7 @@ jobs:
           set -o pipefail
           scons platform=iphone target=release arch=arm64 2>&1 | tee build.log || true
           echo "===== FIRST REAL COMPILER ERROR ====="
-          grep -m 1 -B 5 -A 15 -i "error:" build.log || true
+          grep -n -m 1 -B 5 -A 15 -E ":[0-9]+:[0-9]+: error:" build.log || true
           echo "====================================="
       - name: Prepare SFTA project
         run: |
