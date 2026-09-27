@@ -11,18 +11,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show macOS and Xcode versions
+      - name: Show environment
         run: |
           sw_vers
           xcodebuild -version
-
-      - name: Prepare folders
-        run: |
-          mkdir -p build
-          mkdir -p sfta
-
-      - name: Build environment check
-        run: |
-          echo "SFTA iOS build environment ready"
-          echo "Godot target version: 3.4.3"
           uname -m
+
+      - name: Check uploaded files
+        run: |
+          ls -lah
+          test -f project.binary
+          echo "project.binary found"
+
+      - name: Create iOS project
+        run: |
+          mkdir -p build/SFTA
+          cp project.binary build/SFTA/project.binary
+          echo "SFTA files prepared"
