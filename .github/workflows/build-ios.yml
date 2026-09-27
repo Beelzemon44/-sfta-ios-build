@@ -21,7 +21,7 @@ jobs:
 
       - name: Install SCons
         run: |
-          python3 -m pip install scons
+          brew install scons
 
       - name: Build Godot for iOS
         run: |
