@@ -28,7 +28,7 @@ jobs:
         run: |
           cd godot
           set -o pipefail
-          scons platform=iphone target=release arch=arm64 2>&1 | tee build.log || {
+          scons platform=iphone target=release arch=arm64 CCFLAGS="-Wno-error=module-import-in-extern-c" 2>&1 | tee build.log || {
             echo "========== COMPILER ERRORS =========="
             grep -n -i -B 5 -A 10 "error:" build.log || true
             echo "====================================="
