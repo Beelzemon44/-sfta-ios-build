@@ -21,12 +21,13 @@ jobs:
 
       - name: Install SCons
         run: |
-          brew install scons
+          brew install python@3.11
+          python3.11 -m pip install scons==4.5.2 setuptools
 
       - name: Build Godot for iOS
         run: |
           cd godot
-          scons platform=iphone target=release arch=arm64 -j2
+          python3.11 -m SCons platform=iphone target=release arch=arm64 -j2
 
       - name: Prepare SFTA project
         run: |
