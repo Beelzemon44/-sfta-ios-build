@@ -18,6 +18,7 @@ jobs:
       - name: Patch old libpng for modern Xcode
         run: |
           sed -i '' '/# *include <fp.h>/d' godot/thirdparty/libpng/pngpriv.h
+          sed -i '' '1i #include <math.h>' godot/thirdparty/libpng/png.c
 
       - name: Install SCons
         run: |
