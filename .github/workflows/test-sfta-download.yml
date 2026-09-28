@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Inspect current SFTA download
+      - name: Extract SFTA download element
         run: |
           set -e
 
@@ -29,26 +29,33 @@ jobs:
 
           html = open("page.html", encoding="utf-8", errors="ignore").read()
 
-          matches = re.findall(r"game_download_[0-9]+", html)
-
-          print("===== CURRENT DOWNLOAD IDS =====")
-          print(sorted(set(matches)))
-
-          if not matches:
+          ids = re.findall(r'game_download_[0-9]+', html)
+          if not ids:
               raise SystemExit("No game_download ID found")
 
-          target = matches[0]
-          pos = html.find(target)
+          target = ids[0]
 
-          print("===== USING =====")
+          print("===== CURRENT ID =====")
           print(target)
 
-          start = max(0, pos - 4000)
-          end = min(len(html), pos + 4000)
+          patterns = [
+              rf'<[^>]+id=["\']{re.escape(target)}["\'][^>]*>',
+              rf'<[^>]+id=["\']{re.escape(target)}["\'][^>]*>.*?</[^>]+>',
+          ]
 
-          block = html[start:end]
-          block = re.sub(r'\s+', ' ', block)
+          print("===== ELEMENT =====")
 
-          print("===== DOWNLOAD CONTAINER =====")
-          print(block)
+          found = False
+          for pattern in patterns:
+              m = re.search(pattern, html, re.I | re.S)
+              if m:
+                  text = re.sub(r'\s+', ' ', m.group(0))
+                  print(text[:6000])
+                  found = True
+                  break
+
+          if not found:
+              print("Exact element not found.")
+              pos = html.find(target)
+              print(html[max(0,pos-1000):pos+2000])
           PY
