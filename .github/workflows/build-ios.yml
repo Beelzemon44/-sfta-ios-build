@@ -84,3 +84,7 @@ jobs:
           xxd -l 256 sfta/assets/project.binary
           echo "===== READABLE STRINGS ====="
           strings sfta/assets/project.binary | head -100 || true
+      - name: Find Godot startup info
+        run: |
+          echo "===== STARTUP INFO ====="
+          strings sfta/assets/project.binary | grep -i -E 'run/main_scene|main_scene|autoload|application|\.tscn|\.scn' | head -200 || true
