@@ -62,3 +62,7 @@ jobs:
         run: |
           echo "===== SFTA CONTENTS ====="
           find sfta -maxdepth 4 -type f | head -200
+      - name: Find SFTA project root
+        run: |
+          echo "===== PROJECT CANDIDATES ====="
+          find sfta -type f \( -name "project.godot" -o -name "engine.cfg" -o -name "*.godot" \) -print
