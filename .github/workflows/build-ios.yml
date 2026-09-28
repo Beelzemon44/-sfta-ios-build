@@ -2,6 +2,11 @@ name: Build SFTA iOS
 
 on:
   workflow_dispatch:
+    inputs:
+      drive_file_id:
+        description: "SFTA Google Drive file ID"
+        required: true
+        type: string
 
 jobs:
   build:
@@ -48,7 +53,7 @@ jobs:
       - name: Download SFTA v0.16
         run: |
           python3 -m pip install --user --break-system-packages --quiet gdown
-          python3 -m gdown "1mMha9K5ddEUH-5LIcB1N0Tku0XXf6W8l" -O SFTA_v0.16.zip
+          python3 -m gdown "${{ inputs.drive_file_id }}" -O SFTA_v0.16.zip
           ls -lh SFTA_v0.16.zip
 
       - name: Extract SFTA
