@@ -1,0 +1,23 @@
+name: Test SFTA download
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check SFTA itch.io page
+        run: |
+          set -e
+          curl -fL \
+            -A "Mozilla/5.0" \
+            "https://gamingtalesstudio.itch.io/sfta-demo" \
+            -o sfta-page.html
+
+          echo "Downloaded page:"
+          wc -c sfta-page.html
+
+          echo "Looking for Android / v0.16:"
+          grep -i -E "android|0\.16|download" sfta-page.html | head -50 || true
