@@ -75,3 +75,12 @@ jobs:
           find sfta -type f \( -name "*.pck" -o -name "*.zip" -o -name "*.apk" -o -name "*.exe" -o -name "*.dylib" -o -name "*.so" \) -print
           echo "===== IMPORTANT FILES ====="
           find sfta -type f \( -name "*.cfg" -o -name "*.json" -o -name "*.import" \) -print | head -100
+      - name: Inspect project.binary
+        run: |
+          echo "===== PROJECT.BINARY ====="
+          ls -lh sfta/assets/project.binary
+          file sfta/assets/project.binary
+          echo "===== FIRST BYTES ====="
+          xxd -l 256 sfta/assets/project.binary
+          echo "===== READABLE STRINGS ====="
+          strings sfta/assets/project.binary | head -100 || true
