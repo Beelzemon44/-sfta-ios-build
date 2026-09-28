@@ -90,8 +90,7 @@ jobs:
           test -f ios-build/sfta/scenes/mainMenu.tscn
 
           echo "SFTA data prepared successfully"
-      - name: Create iOS project
+      - name: Find Godot iOS executable
         run: |
-          set -e
-          cd godot
-          ./bin/godot.iphone.opt.tools.64 --path ../ios-build/sfta --export "iPhone" ../ios-build/SFTA
+          echo "===== GODOT BIN ====="
+          find godot/bin -maxdepth 2 -type f -print
