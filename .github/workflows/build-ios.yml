@@ -66,3 +66,11 @@ jobs:
         run: |
           echo "===== PROJECT CANDIDATES ====="
           find sfta -type f \( -name "project.godot" -o -name "engine.cfg" -o -name "*.godot" \) -print
+      - name: Inspect SFTA package
+        run: |
+          echo "===== ROOT ====="
+          find sfta -maxdepth 2 -type f -print | head -100
+          echo "===== PACKAGES ====="
+          find sfta -type f \( -name "*.pck" -o -name "*.zip" -o -name "*.apk" -o -name "*.exe" -o -name "*.dylib" -o -name "*.so" \) -print
+          echo "===== IMPORTANT FILES ====="
+          find sfta -type f \( -name "*.cfg" -o -name "*.json" -o -name "*.import" \) -print | head -100
