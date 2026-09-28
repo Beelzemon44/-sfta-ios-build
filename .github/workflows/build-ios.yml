@@ -47,7 +47,7 @@ jobs:
           grep -n -i -E "error:|fatal error:|scons:.*Error" godot/build.log | tail -30 || true
       - name: Download SFTA v0.16
         run: |
-          python3 -m pip install --quiet gdown
+          python3 -m pip install --user --break-system-packages --quiet gdown
           gdown "1mMha9K5ddEUH-5LIcB1N0Tku0XXf6W8l" -O SFTA_v0.16.zip
           ls -lh SFTA_v0.16.zip
 
