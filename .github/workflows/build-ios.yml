@@ -99,3 +99,21 @@ jobs:
         run: |
           echo "===== IOS TEMPLATE FILES ====="
           find godot -type f \( -name "*.xcodeproj" -o -name "*.xcworkspace" -o -name "*.plist" -o -name "*.zip" -o -name "*.cpp" \) | grep -Ei "iphone|ios|xcode|export" | head -200
+      - name: Create iOS project
+        run: |
+          set -e
+
+          TEMPLATE=$(find godot -type d -name "*.xcodeproj" -print -quit)
+
+          echo "===== XCODE PROJECT ====="
+          echo "$TEMPLATE"
+
+          if [ -z "$TEMPLATE" ]; then
+            echo "No Xcode project found"
+            exit 1
+          fi
+
+          TEMPLATE_DIR=$(dirname "$TEMPLATE")
+          echo "===== TEMPLATE DIRECTORY ====="
+          echo "$TEMPLATE_DIR"
+          find "$TEMPLATE_DIR" -maxdepth 2 -type f | head -100
