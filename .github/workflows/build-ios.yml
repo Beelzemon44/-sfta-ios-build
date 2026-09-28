@@ -90,7 +90,7 @@ jobs:
           test -f ios-build/sfta/scenes/mainMenu.tscn
 
           echo "SFTA data prepared successfully"
-      - name: Find Godot iOS executable
+      - name: Find Godot iOS templates
         run: |
-          echo "===== GODOT BIN ====="
-          find godot/bin -maxdepth 2 -type f -print
+          echo "===== IOS TEMPLATE FILES ====="
+          find godot -type f \( -name "*.xcodeproj" -o -name "*.xcworkspace" -o -name "*.plist" -o -name "*.zip" -o -name "*.cpp" \) | grep -Ei "iphone|ios|xcode|export" | head -200
