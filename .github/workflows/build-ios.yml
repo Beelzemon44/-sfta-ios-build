@@ -58,3 +58,7 @@ jobs:
           echo "===== SFTA EXTRACTED ====="
           du -sh sfta
           find sfta -maxdepth 2 -type f | head -50
+      - name: Find SFTA Godot project
+        run: |
+          echo "===== PROJECT FILES ====="
+          find sfta -type f \( -name "project.godot" -o -name "export_presets.cfg" \) -print
