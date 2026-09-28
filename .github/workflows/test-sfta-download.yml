@@ -1,63 +1,33 @@
-name: Test SFTA download
+name: Download full SFTA
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  download:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get Android download URL
+      - name: Download SFTA from Google Drive
         run: |
           set -e
 
-          PAGE_RESPONSE=$(curl -sS -L \
-            -A "Mozilla/5.0" \
-            -X POST \
-            "https://gamingtalesstudio.itch.io/sfta-demo/download_url")
+          FILE_ID="1mMha9K5ddEUH-5LIcB1N0Tku0XXf6W8l"
 
-          PAGE_URL=$(printf '%s' "$PAGE_RESPONSE" | python3 -c \
-            'import sys,json; print(json.load(sys.stdin)["url"])')
+          python3 -m pip install --quiet gdown
 
-          curl -sS -L \
-            -A "Mozilla/5.0" \
-            "$PAGE_URL" \
-            -o page.html
+          echo "Downloading full SFTA archive..."
+          gdown "$FILE_ID" -O SFTA_v0.16.zip
 
-          python3 <<'PY'
-          import re
+          echo
+          echo "===== DOWNLOADED FILE ====="
+          ls -lh SFTA_v0.16.zip
 
-          data = open("page.html", encoding="utf-8", errors="ignore").read()
+          echo
+          echo "===== ZIP TEST ====="
+          unzip -t SFTA_v0.16.zip > zip-test.txt
 
-          upload_id = "17882920"
+          tail -5 zip-test.txt
 
-          print("======================================")
-          print("ANDROID UPLOAD ID:", upload_id)
-          print("======================================")
-
-          pos = data.find('data-upload_id="' + upload_id + '"')
-
-          if pos == -1:
-              raise SystemExit("Android upload not found")
-
-          start = max(0, pos - 500)
-          end = min(len(data), pos + 2500)
-
-          block = data[start:end]
-
-          print(block)
-
-          print()
-          print("======================================")
-          print("SEARCHING FOR DOWNLOAD PARAMETERS")
-          print("======================================")
-
-          for pattern in [
-              r'https?[^"\']+',
-              r'data-[^=]+=["\'][^"\']+["\']',
-              r'upload_id[^,}<]+'
-          ]:
-              for match in re.findall(pattern, block, re.I):
-                  print(match)
-          PY
+          echo
+          echo "SFTA DOWNLOAD AND ZIP CHECK SUCCESSFUL"
