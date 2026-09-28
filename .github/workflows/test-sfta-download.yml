@@ -8,18 +8,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ask itch.io for SFTA downloads
+      - name: Check actual SFTA download
         run: |
           set -e
 
-          curl -sS -L \
+          RESPONSE=$(curl -sS -L \
             -A "Mozilla/5.0" \
             -X POST \
-            "https://gamingtalesstudio.itch.io/sfta-demo/download_url" \
-            -o response.txt
+            "https://gamingtalesstudio.itch.io/sfta-demo/download_url")
 
-          echo "===== RESPONSE SIZE ====="
-          wc -c response.txt
+          URL=$(printf '%s' "$RESPONSE" | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')
 
-          echo "===== DOWNLOAD INFO ====="
-          grep -o -E '.{0,150}(Android|android|0\.16|upload_id|download|SFTA).{0,250}' response.txt | head -80 || true
+          echo "Temporary URL received."
+          echo "===== FINAL DOWNLOAD HEADERS ====="
+
+          curl -sS -L \
+            -A "Mozilla/5.0" \
+            -r 0-0 \
+            -D headers.txt \
+            -o /dev/null \
+            "$URL"
+
+          grep -i -E "HTTP/|content-length|content-range|content-type|content-disposition" headers.txt || true
