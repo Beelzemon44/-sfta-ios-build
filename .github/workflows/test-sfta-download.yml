@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Extract SFTA download element
+      - name: Find real SFTA file links
         run: |
           set -e
 
@@ -29,33 +29,46 @@ jobs:
 
           html = open("page.html", encoding="utf-8", errors="ignore").read()
 
-          ids = re.findall(r'game_download_[0-9]+', html)
-          if not ids:
-              raise SystemExit("No game_download ID found")
+          m = re.search(r'id=["\'](game_download_[0-9]+)["\']', html)
+          if not m:
+              raise SystemExit("No game_download container found")
 
-          target = ids[0]
+          target = m.group(1)
+          pos = m.start()
 
           print("===== CURRENT ID =====")
           print(target)
 
-          patterns = [
-              rf'<[^>]+id=["\']{re.escape(target)}["\'][^>]*>',
-              rf'<[^>]+id=["\']{re.escape(target)}["\'][^>]*>.*?</[^>]+>',
+          # Everything after the real SFTA download container,
+          # but stop before unrelated recommendations/footer.
+          block = html[pos:pos + 30000]
+
+          terms = [
+              "upload",
+              "download",
+              "android",
+              ".apk",
+              ".zip",
+              "file",
+              "MB",
+              "GB",
           ]
 
-          print("===== ELEMENT =====")
+          print("===== RELEVANT SFTA ENTRIES =====")
 
-          found = False
-          for pattern in patterns:
-              m = re.search(pattern, html, re.I | re.S)
-              if m:
-                  text = re.sub(r'\s+', ' ', m.group(0))
-                  print(text[:6000])
-                  found = True
-                  break
+          results = []
+          for term in terms:
+              for hit in re.finditer(re.escape(term), block, re.I):
+                  start = max(0, hit.start() - 250)
+                  end = min(len(block), hit.end() + 450)
+                  text = re.sub(r'\s+', ' ', block[start:end])
 
-          if not found:
-              print("Exact element not found.")
-              pos = html.find(target)
-              print(html[max(0,pos-1000):pos+2000])
+                  if text not in results:
+                      results.append(text)
+
+          for i, text in enumerate(results[:15], 1):
+              print(f"\n--- {i} ---")
+              print(text)
+
+          print("\nTOTAL:", len(results))
           PY
