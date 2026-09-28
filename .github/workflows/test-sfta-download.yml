@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Find real SFTA file links
+      - name: List all SFTA uploads
         run: |
           set -e
 
@@ -26,49 +26,41 @@ jobs:
 
           python3 <<'PY'
           import re
+          import html as htmlmod
 
-          html = open("page.html", encoding="utf-8", errors="ignore").read()
+          data = open("page.html", encoding="utf-8", errors="ignore").read()
 
-          m = re.search(r'id=["\'](game_download_[0-9]+)["\']', html)
-          if not m:
-              raise SystemExit("No game_download container found")
+          pattern = re.compile(
+              r'data-upload_id=["\'](\d+)["\'].*?'
+              r'class=["\']upload_name["\'].*?'
+              r'<strong[^>]*class=["\']name["\'][^>]*>(.*?)</strong>.*?'
+              r'class=["\']file_size["\'].*?<span>(.*?)</span>',
+              re.I | re.S
+          )
 
-          target = m.group(1)
-          pos = m.start()
+          matches = pattern.findall(data)
 
-          print("===== CURRENT ID =====")
-          print(target)
+          print("======================================")
+          print("          ALL SFTA UPLOADS")
+          print("======================================")
 
-          # Everything after the real SFTA download container,
-          # but stop before unrelated recommendations/footer.
-          block = html[pos:pos + 30000]
+          if not matches:
+              raise SystemExit("No uploads found")
 
-          terms = [
-              "upload",
-              "download",
-              "android",
-              ".apk",
-              ".zip",
-              "file",
-              "MB",
-              "GB",
-          ]
+          for upload_id, name, size in matches:
+              name = re.sub(r'<[^>]+>', '', name)
+              size = re.sub(r'<[^>]+>', '', size)
 
-          print("===== RELEVANT SFTA ENTRIES =====")
+              name = htmlmod.unescape(name).strip()
+              size = htmlmod.unescape(size).strip()
 
-          results = []
-          for term in terms:
-              for hit in re.finditer(re.escape(term), block, re.I):
-                  start = max(0, hit.start() - 250)
-                  end = min(len(block), hit.end() + 450)
-                  text = re.sub(r'\s+', ' ', block[start:end])
+              print()
+              print("NAME:", name)
+              print("SIZE:", size)
+              print("UPLOAD ID:", upload_id)
 
-                  if text not in results:
-                      results.append(text)
-
-          for i, text in enumerate(results[:15], 1):
-              print(f"\n--- {i} ---")
-              print(text)
-
-          print("\nTOTAL:", len(results))
+          print()
+          print("======================================")
+          print("TOTAL:", len(matches))
+          print("======================================")
           PY
