@@ -8,59 +8,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: List all SFTA uploads
+      - name: Get Android download URL
         run: |
           set -e
 
-          RESPONSE=$(curl -sS -L \
+          PAGE_RESPONSE=$(curl -sS -L \
             -A "Mozilla/5.0" \
             -X POST \
             "https://gamingtalesstudio.itch.io/sfta-demo/download_url")
 
-          URL=$(printf '%s' "$RESPONSE" | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')
+          PAGE_URL=$(printf '%s' "$PAGE_RESPONSE" | python3 -c \
+            'import sys,json; print(json.load(sys.stdin)["url"])')
 
           curl -sS -L \
             -A "Mozilla/5.0" \
-            "$URL" \
+            "$PAGE_URL" \
             -o page.html
 
           python3 <<'PY'
           import re
-          import html as htmlmod
 
           data = open("page.html", encoding="utf-8", errors="ignore").read()
 
-          pattern = re.compile(
-              r'data-upload_id=["\'](\d+)["\'].*?'
-              r'class=["\']upload_name["\'].*?'
-              r'<strong[^>]*class=["\']name["\'][^>]*>(.*?)</strong>.*?'
-              r'class=["\']file_size["\'].*?<span>(.*?)</span>',
-              re.I | re.S
-          )
-
-          matches = pattern.findall(data)
+          upload_id = "17882920"
 
           print("======================================")
-          print("          ALL SFTA UPLOADS")
+          print("ANDROID UPLOAD ID:", upload_id)
           print("======================================")
 
-          if not matches:
-              raise SystemExit("No uploads found")
+          pos = data.find('data-upload_id="' + upload_id + '"')
 
-          for upload_id, name, size in matches:
-              name = re.sub(r'<[^>]+>', '', name)
-              size = re.sub(r'<[^>]+>', '', size)
+          if pos == -1:
+              raise SystemExit("Android upload not found")
 
-              name = htmlmod.unescape(name).strip()
-              size = htmlmod.unescape(size).strip()
+          start = max(0, pos - 500)
+          end = min(len(data), pos + 2500)
 
-              print()
-              print("NAME:", name)
-              print("SIZE:", size)
-              print("UPLOAD ID:", upload_id)
+          block = data[start:end]
+
+          print(block)
 
           print()
           print("======================================")
-          print("TOTAL:", len(matches))
+          print("SEARCHING FOR DOWNLOAD PARAMETERS")
           print("======================================")
+
+          for pattern in [
+              r'https?[^"\']+',
+              r'data-[^=]+=["\'][^"\']+["\']',
+              r'upload_id[^,}<]+'
+          ]:
+              for match in re.findall(pattern, block, re.I):
+                  print(match)
           PY
