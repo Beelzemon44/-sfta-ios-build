@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check actual SFTA download
+      - name: Find actual SFTA uploads
         run: |
           set -e
 
@@ -19,14 +19,14 @@ jobs:
 
           URL=$(printf '%s' "$RESPONSE" | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')
 
-          echo "Temporary URL received."
-          echo "===== FINAL DOWNLOAD HEADERS ====="
-
           curl -sS -L \
             -A "Mozilla/5.0" \
-            -r 0-0 \
-            -D headers.txt \
-            -o /dev/null \
-            "$URL"
+            "$URL" \
+            -o download-page.html
 
-          grep -i -E "HTTP/|content-length|content-range|content-type|content-disposition" headers.txt || true
+          echo "===== PAGE SIZE ====="
+          wc -c download-page.html
+
+          echo "===== POSSIBLE UPLOADS ====="
+          grep -oiE '.{0,180}(android|apk|0\.16|upload|file_name|filename|2[.,]?[0-9]* ?GB).{0,300}' download-page.html \
+            | head -100 || true
