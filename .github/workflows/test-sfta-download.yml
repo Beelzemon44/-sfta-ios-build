@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Find actual SFTA uploads
+      - name: Find SFTA download entries
         run: |
           set -e
 
@@ -22,11 +22,33 @@ jobs:
           curl -sS -L \
             -A "Mozilla/5.0" \
             "$URL" \
-            -o download-page.html
+            -o page.html
 
-          echo "===== PAGE SIZE ====="
-          wc -c download-page.html
+          python3 <<'PY'
+          import re
 
-          echo "===== POSSIBLE UPLOADS ====="
-          grep -oiE '.{0,180}(android|apk|0\.16|upload|file_name|filename|2[.,]?[0-9]* ?GB).{0,300}' download-page.html \
-            | head -100 || true
+          html = open("page.html", encoding="utf-8", errors="ignore").read()
+
+          patterns = [
+              r'.{0,250}upload_id.{0,400}',
+              r'.{0,250}uploadId.{0,400}',
+              r'.{0,250}download_btn.{0,500}',
+              r'.{0,250}file_name.{0,400}',
+              r'.{0,250}SFTA.{0,500}',
+          ]
+
+          print("===== SFTA DOWNLOAD CANDIDATES =====")
+
+          found = []
+          for pattern in patterns:
+              for match in re.findall(pattern, html, re.I | re.S):
+                  clean = re.sub(r'\s+', ' ', match)
+                  if clean not in found:
+                      found.append(clean)
+
+          for i, item in enumerate(found[:20], 1):
+              print(f"\n--- MATCH {i} ---")
+              print(item[:900])
+
+          print("\nTOTAL MATCHES:", len(found))
+          PY
