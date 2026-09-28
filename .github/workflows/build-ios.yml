@@ -45,3 +45,16 @@ jobs:
       - name: Show final Godot build error
         run: |
           grep -n -i -E "error:|fatal error:|scons:.*Error" godot/build.log | tail -30 || true
+      - name: Download SFTA v0.16
+        run: |
+          python3 -m pip install --quiet gdown
+          gdown "1mMha9K5ddEUH-5LIcB1N0Tku0XXf6W8l" -O SFTA_v0.16.zip
+          ls -lh SFTA_v0.16.zip
+
+      - name: Extract SFTA
+        run: |
+          mkdir -p sfta
+          unzip -q SFTA_v0.16.zip -d sfta
+          echo "===== SFTA EXTRACTED ====="
+          du -sh sfta
+          find sfta -maxdepth 2 -type f | head -50
