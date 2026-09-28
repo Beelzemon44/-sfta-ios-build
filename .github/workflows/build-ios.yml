@@ -35,7 +35,6 @@ jobs:
         
 
       - name: Build Godot for iOS
-        if: false
         run: |
           cd godot
           set -o pipefail
@@ -83,8 +82,24 @@ jobs:
           echo "===== FIRST BYTES ====="
           xxd -l 256 sfta/assets/project.binary
           echo "===== READABLE STRINGS ====="
-          strings sfta/assets/project.binary | head -100 || true
-      - name: Find Godot startup info
+          strings sfta/assets/project.binary | head -100 || 
+      - name: Prepare SFTA iOS data
         run: |
-          echo "===== STARTUP INFO ====="
-          strings sfta/assets/project.binary | grep -i -E 'run/main_scene|main_scene|autoload|application|\.tscn|\.scn' | head -200 || true
+          set -e
+
+          mkdir -p ios-build/sfta
+
+          # Copy the exported Godot game data from the Android package.
+          cp -R sfta/assets/. ios-build/sfta/
+
+          echo "===== SFTA IOS DATA ====="
+          ls -lh ios-build/sfta/project.binary
+          test -f ios-build/sfta/project.binary
+          test -f ios-build/sfta/scenes/mainMenu.tscn
+
+          echo "SFTA data prepared successfully"
+      - name: Create iOS project
+        run: |
+          set -e
+          cd godot
+          ./bin/godot.iphone.opt.tools.64 --path ../ios-build/sfta --export "iPhone" ../ios-build/SFTA
