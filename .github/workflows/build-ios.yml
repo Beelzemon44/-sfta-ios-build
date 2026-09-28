@@ -35,6 +35,7 @@ jobs:
         
 
       - name: Build Godot for iOS
+        if: false
         run: |
           cd godot
           set -o pipefail
