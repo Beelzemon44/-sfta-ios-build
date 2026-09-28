@@ -8,16 +8,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check SFTA itch.io page
+      - name: Ask itch.io for SFTA downloads
         run: |
           set -e
-          curl -fL \
+
+          curl -sS -L \
             -A "Mozilla/5.0" \
-            "https://gamingtalesstudio.itch.io/sfta-demo" \
-            -o sfta-page.html
+            -X POST \
+            "https://gamingtalesstudio.itch.io/sfta-demo/download_url" \
+            -o response.txt
 
-          echo "Downloaded page:"
-          wc -c sfta-page.html
+          echo "===== RESPONSE SIZE ====="
+          wc -c response.txt
 
-          echo "Looking for Android / v0.16:"
-          grep -i -E "android|0\.16|download" sfta-page.html | head -50 || true
+          echo "===== DOWNLOAD INFO ====="
+          grep -o -E '.{0,150}(Android|android|0\.16|upload_id|download|SFTA).{0,250}' response.txt | head -80 || true
