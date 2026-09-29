@@ -117,3 +117,20 @@ jobs:
           echo "===== TEMPLATE DIRECTORY ====="
           echo "$TEMPLATE_DIR"
           find "$TEMPLATE_DIR" -maxdepth 2 -type f | head -100
+      - name: Assemble SFTA iOS project
+        run: |
+          set -e
+
+          TEMPLATE_DIR="godot/misc/dist/ios_xcode"
+
+          mkdir -p ios-build/project
+          cp -R "$TEMPLATE_DIR"/. ios-build/project/
+
+          cp ios-build/sfta/project.binary ios-build/project/data.pck
+
+          echo "===== FINAL IOS PROJECT ====="
+          ls -lh ios-build/project
+          test -f ios-build/project/godot_ios.xcodeproj/project.pbxproj
+          test -f ios-build/project/data.pck
+
+          echo "SFTA iOS project assembled successfully"
