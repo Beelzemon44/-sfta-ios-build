@@ -134,3 +134,117 @@ jobs:
           test -f ios-build/project/data.pck
 
           echo "SFTA iOS project assembled successfully"
+      - name: Build unsigned SFTA IPA
+        run: |
+          set -euo pipefail
+
+          cd ios-build/project
+
+          mv godot_ios SFTA
+          mv SFTA/godot_ios-Info.plist SFTA/SFTA-Info.plist
+          mv SFTA/godot_ios.entitlements SFTA/SFTA.entitlements
+
+          cp libgodot.iphone.release.fat.a SFTA.a
+          : > SFTA.pck
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          pbx = Path("godot_ios.xcodeproj/project.pbxproj")
+          text = pbx.read_text()
+
+          replacements = {
+              "$binary": "SFTA",
+              "$name": "SFTA",
+              "$identifier": "com.sfta.ios",
+              "$team_id": "",
+              "$godot_archs": "arm64",
+              "$code_sign_identity_debug": "",
+              "$code_sign_identity_release": "",
+              "$provisioning_profile_uuid_debug": "",
+              "$provisioning_profile_uuid_release": "",
+              "$linker_flags": "",
+              "$access_wifi": "0",
+              "$game_center": "0",
+              "$in_app_purchases": "0",
+              "$push_notifications": "0",
+              "$modules_buildfile": "",
+              "$modules_fileref": "",
+              "$modules_buildphase": "",
+              "$modules_buildgrp": "",
+              "$pbx_embeded_frameworks": "",
+              "$pbx_launch_screen_build_reference": "",
+              "$pbx_launch_screen_file_reference": "",
+              "$pbx_launch_screen_copy_files": "",
+              "$pbx_launch_screen_build_phase": "",
+              "$pbx_launch_image_usage_setting": "",
+              "$additional_pbx_files": "",
+              "$additional_pbx_frameworks_build": "",
+              "$additional_pbx_frameworks_refs": "",
+              "$additional_pbx_resources_refs": "",
+              "$additional_pbx_resources_build": "",
+          }
+
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+
+          pbx.write_text(text)
+
+          plist = Path("SFTA/SFTA-Info.plist")
+          text = plist.read_text()
+
+          replacements = {
+              "$name": "SFTA",
+              "$binary": "SFTA",
+              "$short_version": "0.16",
+              "$signature": "SFTA",
+              "$version": "16",
+              "$docs_in_place": "<false/>",
+              "$docs_sharing": "<false/>",
+              "$required_device_capabilities": "<string>arm64</string>",
+              "$camera_usage_description": "Camera access",
+              "$photolibrary_usage_description": "Photo library access",
+              "$microphone_usage_description": "Microphone access",
+              "$interface_orientations": "<string>UIInterfaceOrientationPortrait</string>\n<string>UIInterfaceOrientationLandscapeLeft</string>\n<string>UIInterfaceOrientationLandscapeRight</string>",
+              "$additional_plist_content": "<key>godot_path</key><string>sfta</string>",
+              "$plist_launch_screen_name": "",
+          }
+
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+
+          plist.write_text(text)
+
+          ent = Path("SFTA/SFTA.entitlements")
+          ent.write_text(ent.read_text().replace("$entitlements_push_notifications", ""))
+          PY
+
+          xcodebuild \
+            -project godot_ios.xcodeproj \
+            -target SFTA \
+            -configuration Release \
+            -sdk iphoneos \
+            -arch arm64 \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            DEVELOPMENT_TEAM="" \
+            CONFIGURATION_BUILD_DIR="$PWD/build"
+
+          test -d build/SFTA.app
+
+          cp -R ../sfta build/SFTA.app/sfta
+
+          rm -rf Payload
+          mkdir Payload
+          cp -R build/SFTA.app Payload/SFTA.app
+
+          rm -f ../SFTA-unsigned.ipa
+          zip -qry ../SFTA-unsigned.ipa Payload
+
+          ls -lh ../SFTA-unsigned.ipa
+
+      - name: Upload SFTA IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SFTA-iOS
+          path: ios-build/SFTA-unsigned.ipa
