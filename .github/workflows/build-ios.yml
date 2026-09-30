@@ -134,6 +134,9 @@ jobs:
           test -f ios-build/project/data.pck
 
           echo "SFTA iOS project assembled successfully"
+          echo "===== PBXPROJ FIRST 10 LINES ====="
+          sed -n '1,10p' ios-build/project/godot_ios.xcodeproj/project.pbxproj
+          echo "===== END PBXPROJ ====="
       - name: Build unsigned SFTA IPA
         run: |
           set -euo pipefail
