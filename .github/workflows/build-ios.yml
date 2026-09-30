@@ -218,7 +218,12 @@ jobs:
           ent = Path("SFTA/SFTA.entitlements")
           ent.write_text(ent.read_text().replace("$entitlements_push_notifications", ""))
           PY
+          echo "===== REMAINING PLACEHOLDERS ====="
+          grep -n '\$[A-Za-z_][A-Za-z0-9_]*' godot_ios.xcodeproj/project.pbxproj || true
 
+          echo "===== PBXPROJ CHECK ====="
+          plutil -lint godot_ios.xcodeproj/project.pbxproj || true
+          
           xcodebuild \
             -project godot_ios.xcodeproj \
             -target SFTA \
