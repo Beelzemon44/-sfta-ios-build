@@ -137,9 +137,9 @@ jobs:
           echo "===== PBXPROJ FIRST 10 LINES ====="
           sed -n '1,10p' ios-build/project/godot_ios.xcodeproj/project.pbxproj
           echo "===== END PBXPROJ ====="
-          echo "===== XCODE PBXPROJ PARSE CHECK ====="
-          plutil -lint ios-build/project/godot_ios.xcodeproj/project.pbxproj || true
-          echo "===== END PARSE CHECK ====="
+          echo "===== XCODE PROJECT CHECK ====="
+          xcodebuild -list -project ios-build/project/godot_ios.xcodeproj || true
+          echo "===== END XCODE PROJECT CHECK ====="
       - name: Build unsigned SFTA IPA
         run: |
           set -euo pipefail
