@@ -229,7 +229,9 @@ jobs:
 
           echo "===== PBXPROJ CHECK ====="
           plutil -lint godot_ios.xcodeproj/project.pbxproj || true
-          
+          echo "===== PBXPROJ AROUND DYLIBS ====="
+          grep -n -B 5 -A 15 "dylibs" godot_ios.xcodeproj/project.pbxproj || true
+          echo "===== END DYLIBS ====="
           xcodebuild \
             -project godot_ios.xcodeproj \
             -target SFTA \
