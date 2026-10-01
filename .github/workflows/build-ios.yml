@@ -145,7 +145,8 @@ jobs:
           set -euo pipefail
 
           cd ios-build/project
-
+          sed -i '' '1s|^// !$\*UTF8\*\$!$|// !$*UTF8*$!|' godot_ios.xcodeproj/project.pbxproj
+          head -n 3 godot_ios.xcodeproj/project.pbxproj
           mv godot_ios SFTA
           mv SFTA/godot_ios-Info.plist SFTA/SFTA-Info.plist
           mv SFTA/godot_ios.entitlements SFTA/SFTA.entitlements
